@@ -52,8 +52,8 @@ Open your terminal or command prompt:
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-username/your-repo-name.git
-cd your-repo-name
+git clone https://github.com/Valhari14/Predictive-Analysis-for-Manufacturing-Operations-.git
+cd Predictive-Analysis-for-Manufacturing-Operations-
 ```
 
 ### 2. Install Dependencies
