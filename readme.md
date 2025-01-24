@@ -52,7 +52,7 @@ Open your terminal or command prompt:
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/Valhari14/Predictive-Analysis-for-Manufacturing-Operations-.git
+git clone https://github.com/Valhari14/Predictive-Analysis-for-Manufacturing-Operations.git
 cd Predictive-Analysis-for-Manufacturing-Operations
 ```
 
