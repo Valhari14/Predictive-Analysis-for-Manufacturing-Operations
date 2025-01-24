@@ -15,7 +15,7 @@ MODEL_PATH = "random_forest_model.pkl"
 
 # Global variables
 model = None
-imputer = None  
+imputer = None
 
 
 @app.route("/")
@@ -54,11 +54,11 @@ def upload_file():
         # Get all columns except the target column for prediction
         columns = list(data.columns)
         if "Downtime_Flag" in columns:
-            columns.remove("Downtime_Flag")  
+            columns.remove("Downtime_Flag")
         return {
             "columns": columns,
             "predictor": "Downtime_Flag",
-            "message": "File uploaded successfully!"
+            "message": "File uploaded successfully!",
         }
     except Exception as e:
         return {"error": str(e)}, 500
@@ -89,10 +89,14 @@ def train_model():
         imputer = SimpleImputer(strategy="mean")
         X_imputed = pd.DataFrame(imputer.fit_transform(X), columns=X.columns)
 
-        X_train, X_test, y_train, y_test = train_test_split(X_imputed, y, test_size=0.2, random_state=42, stratify=y)
+        X_train, X_test, y_train, y_test = train_test_split(
+            X_imputed, y, test_size=0.2, random_state=42, stratify=y
+        )
 
         # Train the Random Forest model
-        model = RandomForestClassifier(n_estimators=100, random_state=42, class_weight="balanced")
+        model = RandomForestClassifier(
+            n_estimators=100, random_state=42, class_weight="balanced"
+        )
         model.fit(X_train, y_train)
 
         # Evaluate the model
@@ -101,15 +105,14 @@ def train_model():
         conf_matrix = confusion_matrix(y_test, y_pred).tolist()
         class_report = classification_report(y_test, y_pred, output_dict=True)
 
-        # Save the model and the imputer
-        joblib.dump(model, MODEL_PATH)
-        joblib.dump(imputer, "imputer.pkl")
+        # Save the model and the imputer together in a single file
+        joblib.dump((model, imputer), MODEL_PATH)
 
         return {
             "message": "Model trained successfully!",
             "accuracy": accuracy,
             "confusion_matrix": conf_matrix,
-            "classification_report": class_report
+            "classification_report": class_report,
         }
 
     except Exception as e:
@@ -123,32 +126,26 @@ def predict():
     """
     global model, imputer
     try:
-        if model is None:
+        if model is None or imputer is None:
             if os.path.exists(MODEL_PATH):
-                model = joblib.load(MODEL_PATH)  
+                model, imputer = joblib.load(MODEL_PATH)  # Load both model and imputer
             else:
                 return {"error": "Model not found. Please train the model first using the /train endpoint."}, 400
-        
-        if imputer is None:
-            if os.path.exists("imputer.pkl"):
-                imputer = joblib.load("imputer.pkl")  
-            else:
-                return {"error": "Imputer not found. Please train the model first using the /train endpoint."}, 400
 
         input_data = request.json
         if not input_data:
             return {"error": "Invalid input format. Please provide JSON data."}, 400
 
         data = pd.read_csv(DATA_PATH)
-        
+
         # Get the columns used for prediction (remove target column and any unwanted columns like Date and Machine_ID)
         columns = list(data.columns)
         if "Downtime_Flag" in columns:
-            columns.remove("Downtime_Flag") 
+            columns.remove("Downtime_Flag")
         if "Date" in columns:
-            columns.remove("Date")  
+            columns.remove("Date")
         if "Machine_ID" in columns:
-            columns.remove("Machine_ID")  
+            columns.remove("Machine_ID")
 
         # Convert input JSON to DataFrame and ensure the correct order of features
         input_df = pd.DataFrame([input_data])
